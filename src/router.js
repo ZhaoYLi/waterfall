@@ -20,6 +20,16 @@ export default new Router({
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
-    }
+    },
+    {
+      path: '/horizontal-waterfall',
+      name: 'horizontal-waterfall',
+      component: () => import('./views/HorizontalWaterfall.vue')
+    },
+    {
+      path: '/vertical-waterfall',
+      name: 'vertical-waterfall',
+      component: () => import('./views/VerticalWaterfall.vue')
+    },
   ]
 })

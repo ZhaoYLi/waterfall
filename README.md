@@ -1,6 +1,6 @@
-# waterfall
+## vue 实现图片横向、纵向瀑布流布局
 
-## Project setup
+### Project setup
 ```
 npm install
 ```
@@ -15,15 +15,13 @@ npm run serve
 npm run build
 ```
 
-### Run your tests
-```
-npm run test
-```
-
 ### Lints and fixes files
 ```
 npm run lint
 ```
+### horizontal-waterfall 展示效果
+![horizontal-waterfall]()
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### vertical-waterfall 展示效果
+![vertical-waterfall]()
+

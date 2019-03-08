@@ -20,8 +20,8 @@ npm run build
 npm run lint
 ```
 ### horizontal-waterfall 展示效果
-![horizontal-waterfall]()
+![horizontal-waterfall](https://github.com/ZhaoYLi/waterfall/blob/master/img/horizontal-waterfall.PNG)
 
 ### vertical-waterfall 展示效果
-![vertical-waterfall]()
+![vertical-waterfall](https://github.com/ZhaoYLi/waterfall/blob/master/img/vertical-waterfall.PNG)
 

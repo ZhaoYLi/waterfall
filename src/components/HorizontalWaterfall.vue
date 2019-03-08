@@ -6,12 +6,15 @@
 <script>
 export default {
     props: {
-       boxWidth: {
+       /**
+        * 自定义容器宽度 */
+        boxWidth: {
            type: [String, Number],
            default() {
                return '1000'
             }
        },
+        
        lineNums: {
            type: Number,
            default() {
@@ -29,6 +32,12 @@ export default {
            default() {
                return []
            }
+       },
+       lazyloadData: {
+           type: Array,
+           default() {
+               return []
+           }
        }
 
     },
@@ -37,17 +46,51 @@ export default {
             translateImgs: [],
             layoutImgs: [],
             stdHeight: Number ,
-            imgs: []
+            imgs: [],
+            imgBox: Object,
+            lazyloadList: [],
+            // boxWidth: Number,
+            responsiveList: []
         }
     },
     created() {
-        this.stdHeight = parseInt(this.boxWidth / this.stdRadio)
-        this.getNativeInfo()
+        this.responsiveList = []
     },
-    mounted() {
-        setTimeout(() => {
-            this.createTag()
-        }, 2000);
+    async mounted() {
+        await this.getBoxwidth()
+        this.stdHeight = parseInt(this.boxWidth / this.stdRadio)
+        // console.log('boxWidth', this.boxWidth, 'stdHeight', this.stdHeight)
+        this.getNativeInfo(this.imgList)
+
+        /********************懒加载*********************
+         * 监听滚动条事件， 当滚动到最后一张图片时，加载新的数据
+         * 即页面可视区域高度 + 被卷去高度 = 最后一张图片的offsetTop
+         * offsetTop: 当前元素顶部距离最近父元素顶部的距离，与滚动条无关
+         */
+        window.addEventListener('scroll', () =>{
+            if(this.imgBox) {
+              let items = this.imgBox.children
+              let height = this.getClient() + this.getScrollTop()
+              let lastItemTop = items[items.length -1].offsetTop
+              if( height >= lastItemTop ) {
+                 // console.log('懒加载。。。。')
+                 this.lazyloadList = []
+                 this.lazyloadData.forEach(item=>{
+                 this.lazyloadList.push(item)
+              })
+                 this.getNativeInfo(this.lazyloadList)
+              }
+           }          
+        })
+
+        /*************************响应式布局*****************
+         * 当页面尺寸变化时触发
+         * window.onresize = ()=>{
+            this.getBoxwidth()
+            this.imgBox.innerHTML = ''
+            this.getNativeInfo(this.responsiveList)
+        }
+         */
     },
     methods: {
 
@@ -69,7 +112,7 @@ export default {
                 let r = this.loadImg(item).then(img=>{
                     this.imgs.push(img)
                 }).catch(err=>{
-                  window.console.log(err)
+                    window.console.log('error', err)
                 })
                 arr.push(r)
             })
@@ -92,7 +135,8 @@ export default {
                    }
                 })
         },
-        /*****
+
+        /********************************************************
          * 2、判断图片数量,对图片进行分组，后面需要对图片进行分组布局
          * 如果图片数量为1，那么这张图片将按照原始宽高比来铺满盒子显示
          * 如果图片数量大于1，则对图片进行分组，每组数量为每行显示的数量 */
@@ -113,10 +157,12 @@ export default {
         },
 
         getOneImg(img) {
+           this.layoutImgs = []
            let ratio = img.width / img.height
            img.width = this.boxWidth
            img.height = parseInt(this.boxWidth / ratio)
            this.layoutImgs.push(img) 
+           // this.createTag()
         },
         
         getGroupImg(imgs) {
@@ -127,11 +173,13 @@ export default {
                this.displayGroupImg(imgs)
            }
         },
-        /**
+
+        /************************************************************
          * 如果分组中只有一张图片，即是列表中的最后一张图片，那么该图片会单独
          * 占满整行布局，如果高度过大，则以标准宽高比为准，其余部分被裁剪。否则，
          * 图片完整显示*/
         displayOneImg(img) {
+           this.layoutImgs = []
            let ratio = img.width / img.height
            img.width = this.boxWidth
            if(ratio < this.stdRadio) {
@@ -140,13 +188,16 @@ export default {
                img.height = parseInt(this.boxWidth / ratio)
            }
            this.layoutImgs.push(img)
+           // this.createTag()
         },
         
-        /**
+        /*************************************************************
          * 分组里有多张图片时的布局
          * ① 根据图片原始宽高比来计算每张图片高度为标准高度时的宽度 —— 相对宽度
          * ② 计算总的相对宽度 —— 所有图片相对宽度相加*/
         displayGroupImg(imgs) {
+           this.layoutImgs = []
+           if(imgs.length) {
            let widths = [] //保存每张图片的相对宽度
            let ratios = [] //保存每张图片的原始宽高比
            imgs.forEach(item =>{
@@ -201,22 +252,41 @@ export default {
                }
                this.layoutImgs.push(item)
            })
+            this.createTag()
+           }
         },
 
-        createTag() {
-          // 遍历待布局的图片，创建img标签，完成布局
-          let parentTag = document.getElementById('level-waterfall')
-          parentTag.style.width = this.boxWidth + 'px'
-          this.layoutImgs.forEach((item) =>{
-              let imgBox = document.createElement('div')
-              let imgTag = document.createElement('img')
-              imgBox.setAttribute('class', 'img-box')
-              imgBox.style.width = item.width + 'px'
-              imgBox.style.height = item.height + 'px'
-              imgTag.setAttribute('src', item.src)
-              imgBox.appendChild(imgTag)
-              parentTag.appendChild(imgBox)
+        createTag() { 
+         /*************************************************************
+             * 自定义容器宽度*/
+             this.imgBox = document.getElementById('level-waterfall')
+             this.imgBox.style.width = this.boxWidth + 'px'
+             
+           this.layoutImgs.forEach((item) =>{
+              let div = document.createElement('div')
+              let img = document.createElement('img')
+              div.setAttribute('class', 'img-box')
+              div.style.width = item.width + 'px'
+              div.style.height = item.height + 'px'
+              img.setAttribute('src', item.src)
+              div.appendChild(img)
+              this.imgBox.appendChild(div)
           })
+        },
+        // 获取滚动条高度
+        getScrollTop() {
+            return window.pageYOffset || document.documentElement.scrollTop
+        },
+
+        // 获取可视区域高度，用于判断滚动条是否到底部
+        getClient() {
+            return window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+        },
+        
+        // 获取容器宽度
+        getBoxwidth() {
+            this.imgBox = document.getElementById('level-waterfall')
+            this.boxWidth = this.imgBox.clientWidth
         }
     },
 }
@@ -226,6 +296,7 @@ body{
     min-height: 1200px;
 }
 #level-waterfall {
+    /* width: 100vw; */
     margin: 10px auto;
 }
 .img-box {

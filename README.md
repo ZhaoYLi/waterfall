@@ -1,5 +1,11 @@
 ## vue 实现图片横向、纵向瀑布流布局
 
+### horizontal-waterfall 展示效果
+![horizontal-waterfall](https://github.com/ZhaoYLi/waterfall/blob/master/img/horizontal-waterfall.PNG)
+
+### vertical-waterfall 展示效果
+![vertical-waterfall](https://github.com/ZhaoYLi/waterfall/blob/master/img/vertical-waterfall.PNG)
+
 ### Project setup
 ```
 npm install
@@ -19,9 +25,4 @@ npm run build
 ```
 npm run lint
 ```
-### horizontal-waterfall 展示效果
-![horizontal-waterfall](https://github.com/ZhaoYLi/waterfall/blob/master/img/horizontal-waterfall.PNG)
-
-### vertical-waterfall 展示效果
-![vertical-waterfall](https://github.com/ZhaoYLi/waterfall/blob/master/img/vertical-waterfall.PNG)
 
